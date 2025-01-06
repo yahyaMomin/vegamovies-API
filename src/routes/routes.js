@@ -1,6 +1,8 @@
-import { homeController } from '../controllers/homeController.js'
+import { homeController, searchController } from '../controllers/index.js'
 
 const routes = async (fastify, options) => {
-  fastify.get('/:query/:category?', homeController)
+  fastify.get('/search', searchController)
+  fastify.get('/post/:id/', homeController)
+  fastify.get('/posts/:query/:category?', homeController)
 }
 export default routes

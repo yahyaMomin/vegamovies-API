@@ -5,10 +5,13 @@ export const homeController = async (request, reply) => {
   try {
     const validQueries = [
       'home',
+      'featured',
       'anime-series',
       'web-series',
       'chinese-series',
       'turkish-series',
+      'korean-series',
+      'english',
       'wwe-show',
       'movies-by-genres',
       'movies-by-year',
@@ -17,9 +20,6 @@ export const homeController = async (request, reply) => {
     const page = request.query.page || null
     const { query = null, category = null } = request.params
 
-    console.log(page)
-
-    console.log(query, category)
     if (!validQueries.includes(query)) return createError(reply, 400, 'invalid query')
 
     const homePage = await scraper.homePageScraper(query, category, page)

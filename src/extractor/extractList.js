@@ -1,35 +1,44 @@
 import { load } from 'cheerio'
 
+const extractItemDetails = ($, el) => {
+  const idEl = $(el).find('.post-thumbnail a')
+  return {
+    title: $(el).find('.post-title a').text().replace('Download', '').trim() || null,
+    id: idEl.attr('href')?.split('/').pop() || null,
+    poster: idEl.find('img').attr('src') || null,
+    uploadedAt: $(el).find('.post-date .published').text() || null,
+    format: $(el).find('.post-thumbnail .post-comments').text().trim() || null,
+  }
+}
+
+// Extracts pagination details
+const extractPaginationInfo = ($) => {
+  const $pageInfo = $('.pagination')
+  if ($pageInfo.length < 1)
+    return {
+      currentPage: 1,
+      nextPage: null,
+      hasNextPage: false,
+    }
+  return {
+    currentPage: Number($pageInfo.find('.current').text()) || 1,
+    nextPage: Number($pageInfo.find('.page.larger').first().text()) || null,
+    hasNextPage: $pageInfo.find('.nextpostslink').length > 0,
+  }
+}
+
+// Main function to extract the list and pagination details
 export const extractList = (html) => {
   const $ = load(html)
+
+  // Extract list of items
   const response = []
-  $('#grid-wrapper .group.grid-item').each((i, el) => {
-    const obj = {
-      title: null,
-      id: null,
-      poster: null,
-      uploadedAt: null,
-      format: null,
-    }
-    const idEl = $(el).find('.post-thumbnail a')
-
-    obj.format = $(el).find('.post-thumbnail .post-comments').text().trim() || null
-    obj.id = idEl.attr('href').split('/').pop() || null
-    obj.poster = idEl.find('img').attr('src') || null
-
-    obj.uploadedAt = $(el).find('.post-date .published').text() || null
-
-    obj.title = $(el).find('.post-title a').text().replace('Download', '').trim() || null
-
-    response.push(obj)
+  $('#grid-wrapper .group.grid-item').each((_, el) => {
+    response.push(extractItemDetails($, el))
   })
 
-  const $pageInfo = $('.wp-pagenavi')
-  const pageinfo = {
-    currentPage: Number($pageInfo.find('.current').text()) || null,
-    nextPage: Number($pageInfo.find('.page.larger').first().text()) || null,
-    hasNextPage: $pageInfo.find('.nextpostslink').length ? true : false,
-  }
+  // Extract pagination info
+  const pageinfo = extractPaginationInfo($)
 
   return { pageinfo, response }
 }
