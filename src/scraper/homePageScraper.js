@@ -1,7 +1,7 @@
-import { extractList } from '../../extractor/extractList.js'
-import { interceptor } from '../../services/instance.js'
+import { extractList } from '../extractor/index.js'
+import { interceptor } from '../services/instance.js'
 
-const homePageScraper = async (query = 'home', category = null, page = 1) => {
+export const homePageScraper = async (query = 'home', category = null, page = 1) => {
   try {
     const constructEndpoint = (query, category, page) => {
       const base = category ? `/${query}/${category}` : `/${query}`
@@ -22,4 +22,3 @@ const homePageScraper = async (query = 'home', category = null, page = 1) => {
     return { status: false, message: error.message }
   }
 }
-export default homePageScraper

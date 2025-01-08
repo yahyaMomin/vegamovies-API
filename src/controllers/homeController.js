@@ -1,36 +1,54 @@
+import { validQueries } from '../config/queries.js'
 import { createError, createResponse } from '../helper/response.js'
 import scraper from '../scraper/index.js'
 
 export const homeController = async (request, reply) => {
   try {
-    const validQueries = [
-      'home',
-      'featured',
-      'anime-series',
-      'web-series',
-      'chinese-series',
-      'turkish-series',
-      'korean-series',
-      'english',
-      'wwe-show',
-      'movies-by-genres',
-      'movies-by-year',
-      'movies-by-quality',
-    ]
-    const page = request.query.page || null
     const { query = null, category = null } = request.params
+    const page = request.query.page || null
 
-    if (!validQueries.includes(query)) return createError(reply, 400, 'invalid query')
+    // Find the query in the validQueries list
+    const queryRule = validQueries.find((q) => q.query === query)
 
+    // If query is invalid, return an error
+    if (!queryRule) {
+      return createError(
+        reply,
+        400,
+        `Invalid query. Supported queries are: ${validQueries.map((q) => q.query).join(', ')}`
+      )
+    }
+
+    // Check if category is required but missing
+    if (queryRule.categoryRequired && !category) {
+      return createError(
+        reply,
+        400,
+        `Category is required for the query: ${query} , valid Categories : ${queryRule.validCategories.join(', ')}`
+      )
+    }
+
+    // Check if category is provided when not required (optional)
+    if (!queryRule.categoryRequired && category) {
+      return createError(reply, 400, `Category is not allowed for the query: ${query}`)
+    }
+    if (queryRule.categoryRequired && !queryRule.validCategories.includes(category)) {
+      return createError(
+        reply,
+        400,
+        `invalid Category {${category}} valid category is ${queryRule.validCategories.join(', ')}`
+      )
+    }
+
+    // Perform scraping
     const homePage = await scraper.homePageScraper(query, category, page)
 
     if (homePage.length < 1) {
-      return createError(reply, 404, 'page not found')
+      return createError(reply, 404, 'Page not found')
     }
 
-    // If data is found, send a success response
     return createResponse(reply, 200, homePage)
   } catch (error) {
-    return createError(reply, 500, 'internal server error' + error.message)
+    return createError(reply, 500, 'Internal server error: ' + error.message)
   }
 }
