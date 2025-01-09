@@ -6,7 +6,6 @@ export const extractDetail = (html) => {
 
     const infoContainer = $('.entry-content, .post-inner')
 
-    // Title Extraction
     const title = infoContainer
       .find('h3:contains("Download")')
       .text()
@@ -24,41 +23,46 @@ export const extractDetail = (html) => {
     })
 
     // Download Links Array
-    const downloads = []
-    infoContainer.find('h3:contains("WEB-DL"), h5:contains("WEB-DL")').each((_, el) => {
-      const quality =
-        $(el)
-          .text()
-          .match(/\d+p\b/)?.[0] || '' // Extract quality (e.g., 720p)
-      const size =
-        $(el)
-          .text()
-          .match(/\[\d+(MB|GB)\]/)?.[0]
-          ?.replace(/[\[\]]/g, '') || '' // Extract size
+    const servers = []
+    infoContainer
+      .find(
+        'h3:contains("WEB-DL"), h5:contains("WEB-DL"), h5:contains("HDRip"), h5:contains("BluRay"), h5:contains("{Hindi")'
+      )
+      .each((_, el) => {
+        const downloadtitle = $(el).text().trim()
+        const quality =
+          $(el)
+            .text()
+            .match(/\d+p\b/)?.[0] || '' // Extract quality (e.g., 720p)
+        const size =
+          $(el)
+            .text()
+            .match(/\[\d+(MB|GB)\]/)?.[0]
+            ?.replace(/[\[\]]/g, '') || '' // Extract size
 
-      // Parse the associated download links
-      $(el)
-        .nextUntil('h3, h5', 'p')
-        .find('a')
-        .each((_, linkEl) => {
-          const link = $(linkEl).attr('href')
-          const serverName = $(linkEl).find('button').text().trim() || 'Unknown'
+        // Parse the associated download links
+        $(el)
+          .nextUntil('h3, h5', 'p')
+          .find('a')
+          .each((_, linkEl) => {
+            const url = $(linkEl).attr('href')
+            const serverName = $(linkEl).find('button').text().trim() || 'Unknown'
 
-          downloads.push({
-            title,
-            quality,
-            size,
-            serverName,
-            link,
+            servers.push({
+              downloadtitle,
+              quality,
+              size,
+              serverName,
+              url,
+            })
           })
-        })
-    })
+      })
 
     return {
       title,
       synopsis,
       images,
-      downloads,
+      servers,
     }
   } catch (error) {
     console.error('Error extracting details:', error)

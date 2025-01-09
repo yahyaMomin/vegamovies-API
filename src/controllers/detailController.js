@@ -3,7 +3,7 @@ import scraper from '../scraper/index.js'
 
 export const detailController = async (request, reply) => {
   try {
-    const { id } = request.params
+    const { id } = request.query
     if (!id) return createError(reply, 400, 'id is required')
 
     console.log(id)
