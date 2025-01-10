@@ -1,7 +1,7 @@
 export const createResponse = (reply, status, data) => {
   return reply.status(status).send({
     status: true,
-    ...data,
+    data,
   })
 }
 export const createError = (reply, status, message) => {

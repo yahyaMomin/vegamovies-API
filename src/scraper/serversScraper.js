@@ -8,15 +8,15 @@ export const serversScraper = async (url = null) => {
     if (!url) return { status: false, message: 'url is required' }
 
     console.log(url)
-    const obj = await axios.get(url, {
+    const { data } = await axios.get(url, {
       headers: {
         'Accept-Encoding': HEADERS.ACCEPT_ENCODING,
         'User-Agent': HEADERS.USER_AGENT,
         Cookie: HEADERS.Cookie,
       },
     })
-    if (!obj) return obj
-    const response = extractServers(obj.data)
+    if (!data) return { status: false, message: 'something went wrong in serversScraper' }
+    const response = extractServers(data)
     return response
   } catch (error) {
     return { status: false, message: 'internal server error ' + error.message }

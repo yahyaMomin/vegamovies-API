@@ -2,7 +2,6 @@ import { createError, createResponse } from '../helper/response.js'
 import scraper from '../scraper/index.js'
 
 const link = 'https://nexdrive.lol/genxfm78477617020/'
-scraper.serversScraper(link)
 export const serversController = async (request, reply) => {
   try {
     const { url } = request.query

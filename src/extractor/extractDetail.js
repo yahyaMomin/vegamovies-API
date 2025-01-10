@@ -13,8 +13,8 @@ export const extractDetail = (html) => {
       .trim()
 
     // Synopsis Extraction
-    const synopsis = infoContainer.find('h3:contains("SYNOPSIS/PLOT")').next('p').text().trim()
-
+    const synopsis = infoContainer.find('h3:contains("SYNOPSIS/PLOT"), h4:contains("synopsis")').next('p').text().trim()
+    const type = infoContainer.find('strong:contains("Series Name")').length ? 'series' : 'movie'
     // Images Extraction
     const images = []
     infoContainer.find('img').each((_, el) => {
@@ -26,8 +26,13 @@ export const extractDetail = (html) => {
     const servers = []
     infoContainer
       .find(
-        'h3:contains("WEB-DL"), h5:contains("WEB-DL"), h5:contains("HDRip"), h5:contains("BluRay"), h5:contains("{Hindi")'
+        // 'h3:contains("WEB-DL"), h5:contains("WEB-DL"), h5:contains("HDRip"), h5:contains("BluRay"), h3:contains("Hindi"), h3:contains("English"), h5:contains("English")'
+        'h3, h5'
       )
+      .filter((_, el) => {
+        const text = $(el).text()
+        return text.match(/\[\d+(\.\d+)?(MB|GB)(\/[A-Za-z]+)?\]/)
+      })
       .each((_, el) => {
         const downloadtitle = $(el).text().trim()
         const quality =
@@ -37,10 +42,11 @@ export const extractDetail = (html) => {
         const size =
           $(el)
             .text()
-            .match(/\[\d+(MB|GB)\]/)?.[0]
-            ?.replace(/[\[\]]/g, '') || '' // Extract size
+            .match(/\[\d+(\.\d+)?(MB|GB)(\/[A-Za-z]+)?\]/)?.[0]
+            ?.replace(/[\[\]]/g, '') || ''
 
         // Parse the associated download links
+        const links = []
         $(el)
           .nextUntil('h3, h5', 'p')
           .find('a')
@@ -48,18 +54,19 @@ export const extractDetail = (html) => {
             const url = $(linkEl).attr('href')
             const serverName = $(linkEl).find('button').text().trim() || 'Unknown'
 
-            servers.push({
-              downloadtitle,
-              quality,
-              size,
-              serverName,
-              url,
-            })
+            links.push({ url, serverName })
           })
+        servers.push({
+          downloadtitle,
+          quality,
+          size,
+          links,
+        })
       })
 
     return {
       title,
+      type,
       synopsis,
       images,
       servers,
