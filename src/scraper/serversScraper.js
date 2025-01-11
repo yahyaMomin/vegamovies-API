@@ -1,7 +1,7 @@
 import { interceptor } from '../services/instance.js'
 import axios from 'axios'
 import { extractServers } from '../extractor/index.js'
-import { HEADERS } from '../services/headers.js'
+import { headers } from '../services/headers.js'
 
 export const serversScraper = async (url = null) => {
   try {
@@ -9,11 +9,7 @@ export const serversScraper = async (url = null) => {
 
     console.log(url)
     const { data } = await axios.get(url, {
-      headers: {
-        'Accept-Encoding': HEADERS.ACCEPT_ENCODING,
-        'User-Agent': HEADERS.USER_AGENT,
-        Cookie: HEADERS.Cookie,
-      },
+      headers,
     })
     if (!data) return { status: false, message: 'something went wrong in serversScraper' }
     const response = extractServers(data)

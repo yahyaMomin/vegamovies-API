@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { config } from '../config/config.js'
+import { headers } from './headers.js'
 
 const { vegamoviesURL } = config
 
@@ -13,12 +14,7 @@ export const HEADERS = {
 
 export const axiosInstance = axios.create({
   baseURL: vegamoviesURL,
-
-  headers: {
-    'Accept-Encoding': HEADERS.ACCEPT_ENCODING,
-    'User-Agent': HEADERS.USER_AGENT,
-    Cookie: HEADERS.Cookie,
-  },
+  headers,
 })
 
 // General error handler
