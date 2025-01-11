@@ -3,8 +3,6 @@ import * as cheerio from 'cheerio'
 import { headers } from '../services/headers.js'
 
 export const vcloud = async (link) => {
-  console.log('link ', link)
-
   const decode = function (value) {
     if (value === undefined) {
       return ''
@@ -15,11 +13,11 @@ export const vcloud = async (link) => {
   try {
     const baseUrl = link.split('/').slice(0, 3).join('/')
     const streamLinks = []
+
     const vLinkRes = await axios.get(link, { headers })
 
     const vLinkText = vLinkRes.data
     const $vLink = cheerio.load(vLinkText)
-    console.log($vLink.html())
 
     const vLinkRedirect = vLinkText.match(/var\s+url\s*=\s*'([^']+)';/) || []
     let vcloudLink =
@@ -27,7 +25,6 @@ export const vcloud = async (link) => {
       vLinkRedirect[1] ||
       $vLink('.fa-file-download.fa-lg').parent().attr('href') ||
       link
-    console.log('vcloudLink', vcloudLink)
     if (vcloudLink?.startsWith('/')) {
       vcloudLink = `${baseUrl}${vcloudLink}`
       console.log('New vcloudLink', vcloudLink)
@@ -80,7 +77,6 @@ export const vcloud = async (link) => {
     return streamLinks
   } catch (error) {
     console.log(error.message)
-
     console.log('vcloud Error ', error.message)
     return []
   }

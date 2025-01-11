@@ -1,6 +1,7 @@
 import fastify from './src/app.js'
 
-const PORT = 3000
+const PORT = process.env.PORT || 3000
+
 const startServer = async () => {
   try {
     await fastify.listen({ port: PORT })
