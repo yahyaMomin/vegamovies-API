@@ -3,7 +3,7 @@ import { load } from 'cheerio'
 const extractItemDetails = ($, el) => {
   const idEl = $(el).find('.post-thumbnail a')
   return {
-    title: $(el).find('.post-title a').text().replace('Download', '').trim() || null,
+    title: idEl.find('img').attr('alt') || null || null,
     id: idEl.attr('href')?.split('/').pop() || null,
     poster: idEl.find('img').attr('src') || null,
     uploadedAt: $(el).find('.post-date .published').text() || null,
