@@ -5,6 +5,7 @@ export const extractServers = (html) => {
     const container = $('.entry-inner')
 
     const response = []
+    const movieTitle = $('title').text() || null
     const allh4s = container.find('h4 span').filter((i, el) => {
       return $(el).attr('style') === 'color: #993366;'
     })
@@ -14,9 +15,9 @@ export const extractServers = (html) => {
           title: null,
           downloadLinks: [],
         }
-        obj.title = $(el).find('span').text().trim()
-
+        const titleEl = $(el).find('span').text().trim() || null
         const linksEl = $(el).parent().next('p')
+        obj.title = titleEl ? titleEl.replaceAll('-', '').replaceAll(':', '') : null
 
         linksEl.find('a').each((i, el) => {
           const serverName = $(el).text().trim()
@@ -39,7 +40,7 @@ export const extractServers = (html) => {
       response.push(obj)
     }
 
-    return response
+    return { movieTitle, response }
   } catch (error) {
     console.log(error.message)
     return null

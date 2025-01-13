@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-export const filebee = async (link) => {
+export const filebee = async (link, ip) => {
   try {
     const streamLinks = []
     const filepressID = link?.split('/').pop()
@@ -46,7 +46,7 @@ export const filebee = async (link) => {
 
     return streamLinks
   } catch (error) {
-    console.log('filepress error: ')
+    console.log('filepress error: ', error.message)
     return []
   }
 }

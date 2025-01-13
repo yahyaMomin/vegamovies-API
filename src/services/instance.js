@@ -16,6 +16,9 @@ export const axiosInstance = axios.create({
   baseURL: vegamoviesURL,
   headers,
 })
+export const proxyInstance = axios.create({
+  headers,
+})
 
 // General error handler
 const handleAxiosError = (error) => {

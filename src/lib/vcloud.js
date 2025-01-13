@@ -1,8 +1,9 @@
 import axios from 'axios'
 import * as cheerio from 'cheerio'
 import { headers } from '../services/headers.js'
+import { proxyInstance } from '../services/instance.js'
 
-export const vcloud = async (link) => {
+export const vcloud = async (link, ip) => {
   try {
     const baseUrl = link.split('/').slice(0, 3).join('/')
     const streamLinks = []
@@ -11,9 +12,10 @@ export const vcloud = async (link) => {
     const vLinkRes = await axios.get(link, {
       headers: {
         ...headers,
-        Referer: 'https://vcloud.lol', // Replace with a valid referer if require
+        'X-Forwarded-For': ip,
       },
     })
+
     const vLinkText = vLinkRes.data
 
     // Extract redirection link
@@ -25,7 +27,12 @@ export const vcloud = async (link) => {
     }
 
     // Fetch the redirected page
-    const vcloudRes = await axios.get(vcloudLink, { headers })
+    const vcloudRes = await axios.get(vcloudLink, {
+      headers: {
+        ...headers,
+        'X-Forwarded-For': ip,
+      },
+    })
     const $ = cheerio.load(vcloudRes.data)
 
     // Extract all potential links

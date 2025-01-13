@@ -13,9 +13,11 @@ export const downloadsController = async (request, reply) => {
   try {
     const { url } = request.query
 
+    const userIp = request.headers['x-forwarded-for'] || request.ip
+
     if (!url) return createError(reply, 404, 'url is required')
 
-    const donwloads = await scraper.downloadsScraper(url)
+    const donwloads = await scraper.downloadsScraper(url, userIp)
     if (donwloads.length < 1) return createError(reply, 400, 'something went wrong')
     return createResponse(reply, 200, donwloads)
   } catch (error) {
