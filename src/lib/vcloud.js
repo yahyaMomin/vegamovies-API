@@ -1,7 +1,6 @@
 import axios from 'axios'
 import * as cheerio from 'cheerio'
 import { headers } from '../services/headers.js'
-import { proxyInstance } from '../services/instance.js'
 
 export const vcloud = async (link, ip) => {
   try {
@@ -27,13 +26,11 @@ export const vcloud = async (link, ip) => {
     }
 
     // Fetch the redirected page
-    const vcloudRes = await axios.get(vcloudLink, {
-      headers: {
-        ...headers,
-        'X-Forwarded-For': ip,
-      },
+    const vcloudRes = await fetch(vcloudLink, {
+      headers,
+      redirect: 'follow',
     })
-    const $ = cheerio.load(vcloudRes.data)
+    const $ = cheerio.load(await vcloudRes.text())
 
     // Extract all potential links
     const links = $('.btn-success.btn-lg.h6, .btn-danger, .btn-secondary')
@@ -65,7 +62,7 @@ export const vcloud = async (link, ip) => {
     return streamLinks
   } catch (error) {
     console.error('vcloud Error:', error.message)
-    return []
+    return { status: false, message: error.message }
   }
 }
 
@@ -79,16 +76,16 @@ const processPixelLink = (link) => {
   return link
 }
 
-// Utility function to process HubCloud links
 const processHubCloudLink = async (link, streamLinks) => {
   try {
-    const { data: newLinkRes } = await axios.get(link, { headers })
-    const $newLink = cheerio.load(newLinkRes)
+    const newLinkRes = await axios.get(link, { headers })
+    const $newLink = cheerio.load(newLinkRes.data)
     const newLink = $newLink('#vd').attr('href') || ''
     if (newLink) {
       streamLinks.push({ server: 'HubCloud', link: newLink, type: 'mkv' })
     }
   } catch (error) {
     console.error('HubCloud Extractor Error:', error.message)
+    return { status: false, message: error.message }
   }
 }

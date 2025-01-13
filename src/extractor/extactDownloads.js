@@ -12,10 +12,10 @@ export const extractDownloads = async (link, ip) => {
       const streamLink = await filebee(link, ip)
       return streamLink
     } else {
-      return []
+      return { status: false, message: 'invalid url' }
     }
   } catch (error) {
     console.log('hubcloudExtracter error: ', error)
-    return []
+    return { status: false, message: error.message }
   }
 }

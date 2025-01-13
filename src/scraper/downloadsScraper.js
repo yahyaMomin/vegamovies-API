@@ -6,6 +6,6 @@ export const downloadsScraper = async (url, ip) => {
     return response
   } catch (error) {
     console.log(error.message)
-    return []
+    return { status: false, message: error.message }
   }
 }
