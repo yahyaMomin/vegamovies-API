@@ -2,12 +2,11 @@ import axios from 'axios'
 import { headers } from '../services/headers.js'
 import { load } from 'cheerio'
 
-export const fastDl = async (link, ip) => {
+export const fastDl = async (link) => {
   try {
     const vlink = await axios.get(link, {
       headers: {
         ...headers,
-        'X-Forwarded-For': ip,
       },
     })
     const $vLink = load(vlink.data)

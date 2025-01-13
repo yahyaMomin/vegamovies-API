@@ -2,7 +2,7 @@ import axios from 'axios'
 import * as cheerio from 'cheerio'
 import { headers } from '../services/headers.js'
 
-export const vcloud = async (link, ip) => {
+export const vcloud = async (link) => {
   try {
     const baseUrl = link.split('/').slice(0, 3).join('/')
     const streamLinks = []
@@ -11,13 +11,10 @@ export const vcloud = async (link, ip) => {
     const vLinkRes = await axios.get(link, {
       headers: {
         ...headers,
-        'X-Forwarded-For': ip || '127.0.0.1',
         Referer: baseUrl,
         Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
       },
     })
-    console.log('Response Status:', vLinkRes.status)
-    console.log('Response Headers:', vLinkRes.headers)
 
     const vLinkText = vLinkRes.data
 
@@ -29,14 +26,11 @@ export const vcloud = async (link, ip) => {
       console.log('New vcloudLink:', vcloudLink)
     }
 
-    // Fetch the redirected page
     const vcloudRes = await axios.get(vcloudLink, {
       headers,
       maxRedirects: 5, // Ensure redirects are followed
     })
     const $ = cheerio.load(vcloudRes.data)
-    console.log('vcloud response ', vcloudRes.status)
-    console.log('vcloud response headers', vcloudRes.headers)
 
     // Extract all potential links
     const links = $('.btn-success.btn-lg.h6, .btn-danger, .btn-secondary')

@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-export const filebee = async (link, ip) => {
+export const filebee = async (link) => {
   try {
     const streamLinks = []
     const filepressID = link?.split('/').pop()
