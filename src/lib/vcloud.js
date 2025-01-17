@@ -10,7 +10,12 @@ export const vcloud = async (link) => {
     // Fetch the initial page
     let vLinkText
     try {
-      const vLinkRes = await axios.get(link, { headers })
+      const vLinkRes = await axios.get(link, {
+        headers: {
+          ...headers,
+          'Accept-Encoding': 'gzip, deflate',
+        },
+      })
       vLinkText = vLinkRes.data
     } catch (error) {
       return { status: false, message: 'vLinkRes Error: ' + error.message, error: error }
