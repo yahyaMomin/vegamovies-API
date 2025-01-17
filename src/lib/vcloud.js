@@ -10,17 +10,10 @@ export const vcloud = async (link) => {
     // Fetch the initial page
     let vLinkText
     try {
-      const vLinkRes = await axios.get(link, {
-        headers: {
-          ...headers,
-          Referer: baseUrl,
-          Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        },
-      })
+      const vLinkRes = await axios.get(link, { headers })
       vLinkText = vLinkRes.data
     } catch (error) {
-      console.error('vLinkRes Error:', error.message)
-      return { status: false, message: 'vLinkRes Error: ' + error.message }
+      return { status: false, message: 'vLinkRes Error: ' + error.message, error: error }
     }
 
     // Extract redirection link
