@@ -8,15 +8,20 @@ export const vcloud = async (link) => {
     const streamLinks = []
 
     // Fetch the initial page
-    const vLinkRes = await axios.get(link, {
-      headers: {
-        ...headers,
-        Referer: baseUrl,
-        Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-      },
-    })
-
-    const vLinkText = vLinkRes.data
+    let vLinkText
+    try {
+      const vLinkRes = await axios.get(link, {
+        headers: {
+          ...headers,
+          Referer: baseUrl,
+          Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        },
+      })
+      vLinkText = vLinkRes.data
+    } catch (error) {
+      console.error('vLinkRes Error:', error.message)
+      return { status: false, message: 'vLinkRes Error: ' + error.message }
+    }
 
     // Extract redirection link
     const vLinkMatch = vLinkText.match(/var\s+url\s*=\s*'([^']+)';/)
@@ -26,11 +31,19 @@ export const vcloud = async (link) => {
       console.log('New vcloudLink:', vcloudLink)
     }
 
-    const vcloudRes = await axios.get(vcloudLink, {
-      headers,
-      maxRedirects: 5, // Ensure redirects are followed
-    })
-    const $ = cheerio.load(vcloudRes.data)
+    let vcloudResData
+    try {
+      const vcloudRes = await axios.get(vcloudLink, {
+        headers,
+        maxRedirects: 5,
+      })
+      vcloudResData = vcloudRes.data
+    } catch (error) {
+      console.error('vCloudRes Error:', error.message)
+      return { status: false, message: 'vCloudRes Error: ' + error.message }
+    }
+
+    const $ = cheerio.load(vcloudResData)
 
     // Extract all potential links
     const links = $('.btn-success.btn-lg.h6, .btn-danger, .btn-secondary')
@@ -48,7 +61,10 @@ export const vcloud = async (link) => {
           const processedLink = processPixelLink(link)
           streamLinks.push({ server: 'Pixeldrain', link: processedLink, type: 'mkv' })
         } else if (link.includes('hubcloud') || link.includes('/?id=')) {
-          await processHubCloudLink(link, streamLinks)
+          const hubCloudResult = await processHubCloudLink(link, streamLinks)
+          if (hubCloudResult.status === false) {
+            throw new Error(hubCloudResult.message)
+          }
         } else if (link.includes('cloudflarestorage')) {
           streamLinks.push({ server: 'CfStorage', link, type: 'mkv' })
         } else if (link.includes('fastdl')) {
@@ -61,9 +77,8 @@ export const vcloud = async (link) => {
 
     return streamLinks
   } catch (error) {
-    console.error('vcloud Error:', error.message)
-    console.log(error)
-    return { status: false, message: error.message }
+    console.error('vCloud Error:', error.message)
+    return { status: false, message: 'vCloud Error: ' + error.message }
   }
 }
 
@@ -85,8 +100,9 @@ const processHubCloudLink = async (link, streamLinks) => {
     if (newLink) {
       streamLinks.push({ server: 'HubCloud', link: newLink, type: 'mkv' })
     }
+    return { status: true }
   } catch (error) {
-    console.error('HubCloud Extractor Error:', error.message)
-    return { status: false, message: error.message }
+    console.error('HubCloud Error:', error.message)
+    return { status: false, message: 'HubCloud Error: ' + error.message }
   }
 }

@@ -7,7 +7,7 @@ const startServer = async () => {
     await app.listen({ port: PORT, host: '0.0.0.0' })
     console.log('server is running on PORT : ' + PORT)
   } catch (error) {
-    fastify.log.error(error)
+    app.log.error(error)
     process.exit(1)
   }
 }
