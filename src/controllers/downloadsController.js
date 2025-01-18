@@ -18,7 +18,7 @@ export const downloadsController = async (request, reply) => {
     if (!url) return createError(reply, 404, 'url is required')
 
     const donwloads = await scraper.downloadsScraper(url, userIp)
-    if (!donwloads.status) return reply.status(400).send(donwloads)
+    if (donwloads.status === false) return reply.status(400).send(donwloads)
     // if (donwloads.status === false) return createError(reply, 400, donwloads.message)
     return createResponse(reply, 200, donwloads)
   } catch (error) {

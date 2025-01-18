@@ -1,4 +1,3 @@
-import axios from 'axios'
 import * as cheerio from 'cheerio'
 import { headers } from '../services/headers.js'
 
@@ -6,6 +5,13 @@ export const vcloud = async (link) => {
   try {
     const baseUrl = link.split('/').slice(0, 3).join('/')
     const streamLinks = []
+
+    // Utility function for standardized error responses
+    const createErrorResponse = (message, error) => ({
+      status: false,
+      message,
+      error: error?.message || error,
+    })
 
     // Fetch the initial page
     let vLinkText
@@ -16,16 +22,15 @@ export const vcloud = async (link) => {
           'Accept-Encoding': 'gzip, deflate',
         },
       })
-      vLinkText = await vLinkRes.text()
 
-      // const vLinkRes = await axios.get(link, {
-      //   headers: {
-      //     ...headers,
-      //     'Accept-Encoding': 'gzip, deflate',
-      //   },
-      // })
+      if (!vLinkRes.ok) {
+        throw new Error(`HTTP Error: ${vLinkRes.status} ${vLinkRes.statusText}`)
+      }
+
+      vLinkText = await vLinkRes.text()
     } catch (error) {
-      return { status: false, message: 'vLinkRes Error: ' + error.message, error: error }
+      console.error('vLinkRes Error:', error.message)
+      return createErrorResponse('Failed to fetch the initial page.', error)
     }
 
     // Extract redirection link
@@ -42,10 +47,15 @@ export const vcloud = async (link) => {
         headers,
         redirect: 'follow',
       })
+
+      if (!vcloudRes.ok) {
+        throw new Error(`HTTP Error: ${vcloudRes.status} ${vcloudRes.statusText}`)
+      }
+
       vcloudResData = await vcloudRes.text()
     } catch (error) {
       console.error('vCloudRes Error:', error.message)
-      return { status: false, message: 'vCloudRes Error: ' + error.message, error: error }
+      return createErrorResponse('Failed to fetch the vCloud link.', error)
     }
 
     const $ = cheerio.load(vcloudResData)
@@ -56,34 +66,39 @@ export const vcloud = async (link) => {
       .get()
 
     // Process each link
-    await Promise.all(
-      links.map(async (link) => {
-        if (!link) return
+    try {
+      await Promise.all(
+        links.map(async (link) => {
+          if (!link) return
 
-        if (link.includes('.dev') && !link.includes('/?id=')) {
-          streamLinks.push({ server: 'Cf Worker', link, type: 'mkv' })
-        } else if (link.includes('pixel')) {
-          const processedLink = processPixelLink(link)
-          streamLinks.push({ server: 'Pixeldrain', link: processedLink, type: 'mkv' })
-        } else if (link.includes('hubcloud') || link.includes('/?id=')) {
-          const hubCloudResult = await processHubCloudLink(link, streamLinks)
-          if (hubCloudResult.status === false) {
-            throw new Error(hubCloudResult.message)
+          if (link.includes('.dev') && !link.includes('/?id=')) {
+            streamLinks.push({ server: 'Cf Worker', link, type: 'mkv' })
+          } else if (link.includes('pixel')) {
+            const processedLink = processPixelLink(link)
+            streamLinks.push({ server: 'Pixeldrain', link: processedLink, type: 'mkv' })
+          } else if (link.includes('hubcloud') || link.includes('/?id=')) {
+            const hubCloudResult = await processHubCloudLink(link, streamLinks)
+            if (hubCloudResult.status === false) {
+              throw new Error(hubCloudResult.message)
+            }
+          } else if (link.includes('cloudflarestorage')) {
+            streamLinks.push({ server: 'CfStorage', link, type: 'mkv' })
+          } else if (link.includes('fastdl')) {
+            streamLinks.push({ server: 'FastDl', link, type: 'mkv' })
+          } else if (link.includes('hubcdn')) {
+            streamLinks.push({ server: 'HubCdn', link, type: 'mkv' })
           }
-        } else if (link.includes('cloudflarestorage')) {
-          streamLinks.push({ server: 'CfStorage', link, type: 'mkv' })
-        } else if (link.includes('fastdl')) {
-          streamLinks.push({ server: 'FastDl', link, type: 'mkv' })
-        } else if (link.includes('hubcdn')) {
-          streamLinks.push({ server: 'HubCdn', link, type: 'mkv' })
-        }
-      })
-    )
+        })
+      )
+    } catch (error) {
+      console.error('Processing Links Error:', error.message)
+      return createErrorResponse('Error while processing links.', error)
+    }
 
-    return streamLinks
+    return { status: true, streamLinks }
   } catch (error) {
     console.error('vCloud Error:', error.message)
-    return { status: false, message: 'vCloud Error: ' + error.message, error }
+    return { status: false, message: 'Unexpected error in vCloud function.', error }
   }
 }
 
@@ -100,6 +115,11 @@ const processPixelLink = (link) => {
 const processHubCloudLink = async (link, streamLinks) => {
   try {
     const newLinkRes = await fetch(link, { headers })
+
+    if (!newLinkRes.ok) {
+      throw new Error(`HTTP Error: ${newLinkRes.status} ${newLinkRes.statusText}`)
+    }
+
     const $newLink = cheerio.load(await newLinkRes.text())
     const newLink = $newLink('#vd').attr('href') || ''
     if (newLink) {
@@ -108,6 +128,10 @@ const processHubCloudLink = async (link, streamLinks) => {
     return { status: true }
   } catch (error) {
     console.error('HubCloud Error:', error.message)
-    return { status: false, message: 'HubCloud Error: ' + error.message, error }
+    return {
+      status: false,
+      message: 'Failed to process HubCloud link.',
+      error: error.message,
+    }
   }
 }
