@@ -10,13 +10,20 @@ export const vcloud = async (link) => {
     // Fetch the initial page
     let vLinkText
     try {
-      const vLinkRes = await axios.get(link, {
+      const vLinkRes = await fetch(link, {
         headers: {
           ...headers,
           'Accept-Encoding': 'gzip, deflate',
         },
       })
-      vLinkText = vLinkRes.data
+      vLinkText = await vLinkRes.text()
+
+      // const vLinkRes = await axios.get(link, {
+      //   headers: {
+      //     ...headers,
+      //     'Accept-Encoding': 'gzip, deflate',
+      //   },
+      // })
     } catch (error) {
       return { status: false, message: 'vLinkRes Error: ' + error.message, error: error }
     }
@@ -38,7 +45,7 @@ export const vcloud = async (link) => {
       vcloudResData = vcloudRes.data
     } catch (error) {
       console.error('vCloudRes Error:', error.message)
-      return { status: false, message: 'vCloudRes Error: ' + error.message }
+      return { status: false, message: 'vCloudRes Error: ' + error.message, error: error }
     }
 
     const $ = cheerio.load(vcloudResData)
@@ -76,7 +83,7 @@ export const vcloud = async (link) => {
     return streamLinks
   } catch (error) {
     console.error('vCloud Error:', error.message)
-    return { status: false, message: 'vCloud Error: ' + error.message }
+    return { status: false, message: 'vCloud Error: ' + error.message, error }
   }
 }
 
@@ -101,6 +108,6 @@ const processHubCloudLink = async (link, streamLinks) => {
     return { status: true }
   } catch (error) {
     console.error('HubCloud Error:', error.message)
-    return { status: false, message: 'HubCloud Error: ' + error.message }
+    return { status: false, message: 'HubCloud Error: ' + error.message, error }
   }
 }
