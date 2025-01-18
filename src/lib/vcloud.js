@@ -38,11 +38,11 @@ export const vcloud = async (link) => {
 
     let vcloudResData
     try {
-      const vcloudRes = await axios.get(vcloudLink, {
+      const vcloudRes = await fetch(vcloudLink, {
         headers,
-        maxRedirects: 5,
+        redirect: 'follow',
       })
-      vcloudResData = vcloudRes.data
+      vcloudResData = await vcloudRes.text()
     } catch (error) {
       console.error('vCloudRes Error:', error.message)
       return { status: false, message: 'vCloudRes Error: ' + error.message, error: error }
@@ -99,8 +99,8 @@ const processPixelLink = (link) => {
 
 const processHubCloudLink = async (link, streamLinks) => {
   try {
-    const newLinkRes = await axios.get(link, { headers })
-    const $newLink = cheerio.load(newLinkRes.data)
+    const newLinkRes = await fetch(link, { headers })
+    const $newLink = cheerio.load(await newLinkRes.text())
     const newLink = $newLink('#vd').attr('href') || ''
     if (newLink) {
       streamLinks.push({ server: 'HubCloud', link: newLink, type: 'mkv' })
