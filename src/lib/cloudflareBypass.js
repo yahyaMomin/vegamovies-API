@@ -19,6 +19,8 @@ import 'puppeteer-extra-plugin-stealth/evasions/user-agent-override/index.js'
 import 'puppeteer-extra-plugin-stealth/evasions/webgl.vendor/index.js'
 import 'puppeteer-extra-plugin-stealth/evasions/window.outerdimensions/index.js'
 
+import 'puppeteer-extra-plugin-user-preferences'
+
 const stealth = StealthPlugin()
 stealth.enabledEvasions.add('chrome.app')
 puppeteer.use(stealth)
@@ -69,6 +71,7 @@ const cloudflareBypass = async (url) => {
     const html = await page.content()
 
     await browser.close()
+
     return html
   } catch (error) {
     console.error('Cloudflare Bypass Error:', error.message)
