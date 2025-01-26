@@ -1,5 +1,6 @@
 import puppeteer from 'puppeteer-extra'
 import StealthPlugin from 'puppeteer-extra-plugin-stealth'
+import 'puppeteer-extra-plugin-stealth/evasions/chrome.app/index.js'
 
 const stealth = StealthPlugin()
 stealth.enabledEvasions.add('chrome.app')
