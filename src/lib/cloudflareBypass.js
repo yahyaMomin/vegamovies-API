@@ -1,6 +1,23 @@
 import puppeteer from 'puppeteer-extra'
 import StealthPlugin from 'puppeteer-extra-plugin-stealth'
+
 import 'puppeteer-extra-plugin-stealth/evasions/chrome.app/index.js'
+import 'puppeteer-extra-plugin-stealth/evasions/chrome.csi/index.js'
+import 'puppeteer-extra-plugin-stealth/evasions/chrome.loadTimes/index.js'
+import 'puppeteer-extra-plugin-stealth/evasions/chrome.runtime/index.js'
+import 'puppeteer-extra-plugin-stealth/evasions/defaultArgs/index.js'
+import 'puppeteer-extra-plugin-stealth/evasions/iframe.contentWindow/index.js'
+import 'puppeteer-extra-plugin-stealth/evasions/media.codecs/index.js'
+import 'puppeteer-extra-plugin-stealth/evasions/navigator.hardwareConcurrency/index.js'
+import 'puppeteer-extra-plugin-stealth/evasions/navigator.languages/index.js'
+import 'puppeteer-extra-plugin-stealth/evasions/navigator.permissions/index.js'
+import 'puppeteer-extra-plugin-stealth/evasions/navigator.plugins/index.js'
+import 'puppeteer-extra-plugin-stealth/evasions/navigator.vendor/index.js'
+import 'puppeteer-extra-plugin-stealth/evasions/navigator.webdriver/index.js'
+import 'puppeteer-extra-plugin-stealth/evasions/sourceurl/index.js'
+import 'puppeteer-extra-plugin-stealth/evasions/user-agent-override/index.js'
+import 'puppeteer-extra-plugin-stealth/evasions/webgl.vendor/index.js'
+import 'puppeteer-extra-plugin-stealth/evasions/window.outerdimensions/index.js'
 
 const stealth = StealthPlugin()
 stealth.enabledEvasions.add('chrome.app')
