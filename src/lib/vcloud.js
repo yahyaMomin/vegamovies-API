@@ -1,12 +1,12 @@
 import * as cheerio from 'cheerio'
 import { headers } from '../services/headers.js'
-
+import fetch from 'node-fetch'
+import cloudflareBypass from './cloudflareBypass.js'
 export const vcloud = async (link) => {
   try {
     const baseUrl = link.split('/').slice(0, 3).join('/')
     const streamLinks = []
 
-    // Utility function for standardized error responses
     const createErrorResponse = (message, error) => ({
       status: false,
       message,
@@ -15,19 +15,15 @@ export const vcloud = async (link) => {
 
     // Fetch the initial page
     let vLinkText
-    try {
-      const vLinkRes = await fetch(link, {
-        headers: {
-          ...headers,
-          'Accept-Encoding': 'gzip, deflate',
-        },
-      })
 
-      if (!vLinkRes.ok) {
-        throw new Error(`HTTP Error: ${vLinkRes.status} ${vLinkRes.statusText}`)
+    try {
+      const vLinkRes = await cloudflareBypass(link)
+
+      if (!vLinkRes) {
+        throw new Error(`HTTP Error: cloudflare Bypass failed`)
       }
 
-      vLinkText = await vLinkRes.text()
+      vLinkText = vLinkRes
     } catch (error) {
       console.error('vLinkRes Error:', error.message)
       return createErrorResponse('Failed to fetch the initial page.', error)
