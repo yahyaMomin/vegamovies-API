@@ -96,8 +96,6 @@ const processPixelLink = (link) => {
 
 // Utility function to process HubCloud links
 const processHubCloudLink = async (link, streamLinks) => {
-  console.log(link)
-
   try {
     const newLinkRes = await fetch(link, { headers })
     if (!newLinkRes.ok) return { status: true }

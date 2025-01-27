@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: vegamovies
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: PUPPETEER_SKIP_DOWNLOAD
+        value: 'true'
