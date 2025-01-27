@@ -1,6 +1,6 @@
 import { connect } from 'puppeteer-real-browser'
 
-async function cloudflareBypass() {
+async function cloudflareBypass(url) {
   try {
     const response = await connect({
       headless: 'auto',
@@ -20,11 +20,21 @@ async function cloudflareBypass() {
     })
 
     const { browser, page } = response
-    await page.goto('https://nopecha.com/demo')
+    await page.goto(url, { waitUntil: 'networkidle0' })
+
+    // Wait for user interaction (e.g., solving CAPTCHA) if necessary
+    console.log('Please solve the CAPTCHA manually if it appears.')
+
+    // Optionally, add logic to detect CAPTCHA resolution if possible
+
+    // After CAPTCHA is solved, get the page content
+    const htmlContent = await page.content()
+
+    await browser.close()
+    return htmlContent
   } catch (error) {
     console.error(error.message)
   }
 }
 
-cloudflareBypass()
-export default cloudflareBypass()
+export default cloudflareBypass
